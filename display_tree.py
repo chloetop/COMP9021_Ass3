@@ -43,10 +43,13 @@ def open_file(filename):
 
 def scan_file(file):
 	two_node_flag = 0
+	root = 0
 	for line in file:
 			if not line.strip():
 				two_node_flag += 1
-				spaces_before_nodes = len(line) - len(line.lstrip(' '))
+				if root == 0:
+					spaces_before_nodes = len(line) - len(line.lstrip(' '))
+					root = 1
 	if two_node_flag < 2:
 		raise_error(3)
 	else:
