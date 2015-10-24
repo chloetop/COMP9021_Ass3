@@ -11,11 +11,12 @@ def process_arguments():
 	else:
 		if len(args) == 1 and args[0].endswith('.txt'):
 			open_file(args[0])
-		else:
+		if not args[0].endswith('.txt') and len(args)==1:
 			raise_error(5)
 	if len(args) > 1:
-		valid = [True for x in a[:len(a)-1] if x.endswith('.txt')]
-		if valid[0]:
+		valid = [True for x in args[:len(args)-1] if x.endswith('.txt')]
+		print(valid)
+		if len(valid)==1:
 			raise_error(4)
 		else:
 			if args[0] == '-nodestyle':
