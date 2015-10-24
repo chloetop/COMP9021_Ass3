@@ -42,18 +42,25 @@ def open_file(filename):
 		x = scan_file(file)
 
 def scan_file(file):
-	two_node_flag = 0
-	root = 0
+	lines = 0
+	x = 0
+	y = 0
+	nodes = []
 	for line in file:
 			if not line.strip():
-				two_node_flag += 1
-				if root == 0:
-					spaces_before_nodes = len(line) - len(line.lstrip(' '))
-					root = 1
-	if two_node_flag < 2:
+				lines += 1
+				if lines == 1:
+					x = len(line) - len(line.lstrip(' '))
+					node.append([])
+				if lines == 2:
+					y = len(line) - len(line.lstrip(' '))
+					y = y-x
+
+	if lines < 2:
 		raise_error(3)
 	else:
-		return spaces_before_nodes
+		print("X: ",x,'Y: ',y)
+		return x,y
 
 def raise_error(_id):
 	print('Incorrect invocation',_id)
