@@ -27,19 +27,25 @@ def process_arguments():
 			if args[0] == '-nodestyle':
 				if args[1] in nodestyles:
 					default_nodestyle = args[1]
-			if len(args) > 2:
-				if args[2] == '-nodestyle':
-					if args[3] in nodestyles:
-						default_nodestyle = args[3]
+				if len(args) > 2:
+					if args[2] == '-grow':
+						if args[3] in grow_list:
+							grow_style = args[3]
+						else:
+							raise_error(6)
+					else:
+						raise_error(7)
 			if args[0] == '-grow':
 				if args[1] in grow_list:
 					grow_style = args[1]
-			if len(args) > 2:
-				if args[2] == '-grow':
-					if args[3] in grow_list:
-						grow_style = args[3]
-
-
+				if len(args) > 2:
+					if args[2] == '-nodestyle':
+						if args[3] in nodestyles:
+							default_nodestyle = args[3]
+						else:
+							raise_error(6)
+					else:
+						raise_error(7)
 
 def open_file(filename):
 	num_space = 0
@@ -47,6 +53,7 @@ def open_file(filename):
 		x = scan_file(file)
 
 def scan_file(file):
+	parents = [None]*100
 	lines = 0
 	x = 0
 	y = 0
@@ -58,29 +65,43 @@ def scan_file(file):
 				if lines == 1:
 					x = len(line) - len(line.lstrip(' '))
 					root = line.strip()
-					nodes.append([root,0,parent])
-					parent = root
+					parents[0] = None
+					nodes.append([root,1,parents[0],None])
+					# parent = root
+					
 				elif lines == 2:
 					y = len(line) - len(line.lstrip(' '))
 					y = y-x
 					num_space = len(line) - len(line.lstrip(' '))
 					curr_node = line.strip()
-					nodes.append([curr_node,1,parent])
-					prev_node = curr_node
-					prev_parent = parent
+					parents[1] = root
+					nodes.append([curr_node,2,parents[1],None])
+					parents[2] = curr_node
+					# prev_node = curr_node
+					# prev_parent = parent
+					
 				else:
-					if num_space < (len(line) - len(line.lstrip(' '))):
-						prev_parent = parent
-						parent = prev_node
-					elif num_space == (len(line) - len(line.lstrip(' '))):
-						pass
-					elif num_space > (len(line) - len(line.lstrip(' '))):
-						parent = prev_parent
+					# if num_space < (len(line) - len(line.lstrip(' '))):
+					# 	prev_parent = parent
+					# 	parent = prev_node
+					# elif num_space == (len(line) - len(line.lstrip(' '))):
+					# 	pass
+					# elif num_space > (len(line) - len(line.lstrip(' '))):
+					# 	parent = prev_parent
 					num_space = len(line) - len(line.lstrip(' '))
-					level = (num_space - x)/y
+					if not ((num_space - x)/y) - int((num_space - x)/y) == 0:
+						raise_error(8)
+					level = int((num_space - x)/y) + 1
 					curr_node = line.strip()
-					nodes.append([curr_node,level,parent])
-					prev_node = curr_node
+					if curr_node == '':
+						nodes[len(nodes)-1][3] = ''
+					elif curr_node == '':
+						nodes[len(nodes)-1][3] = '[fill=none] {edge from parent[draw=none]}'
+					else:
+						nodes.append([curr_node,level,parents[level-1],None])
+						prev_node = curr_node
+						if level >= 1:
+							parents[level] = curr_node
 
 	if lines < 2:
 		raise_error(3)
