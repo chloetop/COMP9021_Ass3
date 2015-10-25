@@ -46,6 +46,9 @@ def process_arguments():
 							raise_error(6)
 					else:
 						raise_error(7)
+	text_fle = [x for x in args if x.endswith('.txt')]
+	if text_fle:
+				open_file(text_fle[0])
 
 def open_file(filename):
 	num_space = 0
