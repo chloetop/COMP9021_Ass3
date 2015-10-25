@@ -1,5 +1,4 @@
 import sys
-# added Comm
 
 default_nodestyle = None
 grow_style = None
@@ -51,21 +50,43 @@ def scan_file(file):
 	lines = 0
 	x = 0
 	y = 0
+	parent = None
 	nodes = []
 	for line in file:
 			if len(line.strip()) > 0:
 				lines += 1
 				if lines == 1:
 					x = len(line) - len(line.lstrip(' '))
-					nodes.append([])
-				if lines == 2:
+					root = line.strip()
+					nodes.append([root,0,parent])
+					parent = root
+				elif lines == 2:
 					y = len(line) - len(line.lstrip(' '))
 					y = y-x
+					num_space = len(line) - len(line.lstrip(' '))
+					curr_node = line.strip()
+					nodes.append([curr_node,1,parent])
+					prev_node = curr_node
+					prev_parent = parent
+				else:
+					if num_space < (len(line) - len(line.lstrip(' '))):
+						prev_parent = parent
+						parent = prev_node
+					elif num_space == (len(line) - len(line.lstrip(' '))):
+						pass
+					elif num_space > (len(line) - len(line.lstrip(' '))):
+						parent = prev_parent
+					num_space = len(line) - len(line.lstrip(' '))
+					level = (num_space - x)/y
+					curr_node = line.strip()
+					nodes.append([curr_node,level,parent])
+					prev_node = curr_node
 
 	if lines < 2:
 		raise_error(3)
 	else:
 		print("X: ",x,'Y: ',y)
+		print(nodes)
 		return [x,y]
 
 def raise_error(_id):
