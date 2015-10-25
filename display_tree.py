@@ -1,6 +1,12 @@
 import sys
 # added Comm
+
+default_nodestyle = None
+grow_style = None
+
 def process_arguments():
+	global default_nodestyle
+	global grow_style
 	nodestyles = ['circle','rectangle','ellipse']
 	grow_list = ['up','down','left','right']
 	args = sys.argv[1:]
@@ -47,11 +53,11 @@ def scan_file(file):
 	y = 0
 	nodes = []
 	for line in file:
-			if not line.strip():
+			if len(line.strip()) > 0:
 				lines += 1
 				if lines == 1:
 					x = len(line) - len(line.lstrip(' '))
-					node.append([])
+					nodes.append([])
 				if lines == 2:
 					y = len(line) - len(line.lstrip(' '))
 					y = y-x
@@ -60,7 +66,7 @@ def scan_file(file):
 		raise_error(3)
 	else:
 		print("X: ",x,'Y: ',y)
-		return x,y
+		return [x,y]
 
 def raise_error(_id):
 	print('Incorrect invocation',_id)
