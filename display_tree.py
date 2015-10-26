@@ -20,35 +20,40 @@ def process_arguments():
 			raise_error(5)
 	if len(args) > 1:
 		valid = [True for x in args[:len(args)-1] if x.endswith('.txt')]
-		print(valid)
+		# print(valid)
 		if len(valid)==1:
 			raise_error(4)
 		else:
 			if args[0] == '-nodestyle':
+				# print(args)
 				if args[1] in nodestyles:
 					default_nodestyle = args[1]
-				if len(args) > 2:
+				else:
+					raise_error(7)
+				if len(args) > 3:
 					if args[2] == '-grow':
 						if args[3] in grow_list:
 							grow_style = args[3]
 						else:
 							raise_error(6)
 					else:
-						raise_error(7)
+						raise_error(9)
+
 			if args[0] == '-grow':
+				# print(args)
 				if args[1] in grow_list:
 					grow_style = args[1]
-				if len(args) > 2:
+				else:
+					raise_error(7)
+				if len(args) > 3:
 					if args[2] == '-nodestyle':
 						if args[3] in nodestyles:
 							default_nodestyle = args[3]
 						else:
 							raise_error(6)
 					else:
-						raise_error(7)
-	text_fle = [x for x in args if x.endswith('.txt')]
-	if text_fle:
-				open_file(text_fle[0])
+						raise_error(9)
+		open_file(args[len(args)-1])
 
 def open_file(filename):
 	num_space = 0
@@ -80,6 +85,7 @@ def scan_file(file):
 					parents[1] = root
 					nodes.append([curr_node,2,parents[1],None])
 					parents[2] = curr_node
+					prev_numspace = num_space
 					# prev_node = curr_node
 					# prev_parent = parent
 					
@@ -92,7 +98,7 @@ def scan_file(file):
 					# elif num_space > (len(line) - len(line.lstrip(' '))):
 					# 	parent = prev_parent
 					num_space = len(line) - len(line.lstrip(' '))
-					if not ((num_space - x)/y) - int((num_space - x)/y) == 0:
+					if not (num_space-x) % y == 0:
 						raise_error(8)
 					level = int((num_space - x)/y) + 1
 					curr_node = line.strip()
@@ -105,6 +111,7 @@ def scan_file(file):
 						prev_node = curr_node
 						if level >= 1:
 							parents[level] = curr_node
+						prev_numspace = num_space
 
 	if lines < 2:
 		raise_error(3)
@@ -115,6 +122,7 @@ def scan_file(file):
 
 def raise_error(_id):
 	print('Incorrect invocation',_id)
+	# print('Incorrect invocation')
 	sys.exit()
 
 process_arguments()
