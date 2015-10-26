@@ -62,6 +62,7 @@ def open_file(filename):
 
 def scan_file(file):
 	parents = [None]*100
+	space_validation = []
 	lines = 0
 	x = 0
 	y = 0
@@ -75,6 +76,7 @@ def scan_file(file):
 					root = line.strip()
 					parents[0] = None
 					nodes.append([root,1,parents[0],None])
+					space_validation.append(x)
 					# parent = root
 					
 				elif lines == 2:
@@ -86,6 +88,7 @@ def scan_file(file):
 					nodes.append([curr_node,2,parents[1],None])
 					parents[2] = curr_node
 					prev_numspace = num_space
+					space_validation.append(num_space)
 					# prev_node = curr_node
 					# prev_parent = parent
 					
@@ -98,8 +101,11 @@ def scan_file(file):
 					# elif num_space > (len(line) - len(line.lstrip(' '))):
 					# 	parent = prev_parent
 					num_space = len(line) - len(line.lstrip(' '))
-					if not (num_space-x) % y == 0:
+					if not (num_space) - y in space_validation:
+						# print(space_validation)
+						# print(line.strip(),x,y,num_space,(num_space) - y)
 						raise_error(8)
+					space_validation.append(num_space)
 					level = int((num_space - x)/y) + 1
 					curr_node = line.strip()
 					if curr_node == '':
