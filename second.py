@@ -1,6 +1,7 @@
 import sys
 import math
-
+import re
+# regex = re.compile('^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$')
 romanList = [
     (1000, "M"), (900, "CM"),
     (500, "D"), (400, "CD"), 
@@ -52,10 +53,13 @@ if len(provided_input) == 1 or len(provided_input) ==2 or len(provided_input)==3
 
             raise_error('2')
     elif len(provided_input) == 3:
-        if provided_input[2] == 'using':
+        values = re.compile('^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$')
+
+        if provided_input[1] == 'using' and values.match(provided_input[2]):
             print('correct')
         else:
             raise_error('3')
+
 else:
     raise_error('1')
 
