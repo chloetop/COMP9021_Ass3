@@ -105,6 +105,8 @@ def scan_file(file):
 						# print(space_validation)
 						# print(line.strip(),x,y,num_space,(num_space) - y)
 						raise_error(8)
+					if num_space > prev_numspace and not num_space == (prev_numspace + y):
+						raise_error(10)
 					space_validation.append(num_space)
 					level = int((num_space - x)/y) + 1
 					curr_node = line.strip()
