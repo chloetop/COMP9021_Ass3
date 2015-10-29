@@ -19,7 +19,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 # 
-# Written by Subramanya Vajiraya (z5081713) and Eric Martin for COMP9021
+# Written by Subramanya Vajiraya (z5081713) COMP9021
 
 import sys
 
