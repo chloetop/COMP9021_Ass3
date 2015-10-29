@@ -1,3 +1,4 @@
+
 python display_tree.py tree_1.txt
 diff tree_1.tex Test_files/tree_1.tex 
 python display_tree.py -grow up tree_2.txt 
