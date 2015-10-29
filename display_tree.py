@@ -2,8 +2,11 @@ import sys
 
 default_nodestyle = None
 grow_style = None
-
+nodes = []
+op_ready=[]
+filename = None
 def process_arguments():
+	global filename
 	global default_nodestyle
 	global grow_style
 	nodestyles = ['circle','rectangle','ellipse']
@@ -15,7 +18,8 @@ def process_arguments():
 		raise_error(2)
 	else:
 		if len(args) == 1 and args[0].endswith('.txt'):
-			open_file(args[0])
+			filename = args[0]
+			open_file(filename)
 		if not args[0].endswith('.txt') and len(args)==1:
 			raise_error(5)
 	if len(args) > 1:
@@ -53,84 +57,252 @@ def process_arguments():
 							raise_error(6)
 					else:
 						raise_error(9)
-		open_file(args[len(args)-1])
+		filename = args[len(args)-1]
+		open_file(filename)
 
 def open_file(filename):
 	num_space = 0
 	with open(filename, 'r') as file:
 		x = scan_file(file)
-
+lines = 0
 def scan_file(file):
 	parents = [None]*100
 	space_validation = []
-	lines = 0
+	global lines 
 	x = 0
 	y = 0
 	parent = None
-	nodes = []
+	global nodes
 	for line in file:
-			if len(line.strip()) > 0:
-				lines += 1
-				if lines == 1:
-					x = len(line) - len(line.lstrip(' '))
-					root = line.strip()
-					parents[0] = None
-					nodes.append([root,1,parents[0],None])
-					space_validation.append(x)
-					# parent = root
-					
-				elif lines == 2:
-					y = len(line) - len(line.lstrip(' '))
-					y = y-x
-					num_space = len(line) - len(line.lstrip(' '))
-					curr_node = line.strip()
-					parents[1] = root
-					nodes.append([curr_node,2,parents[1],None])
-					parents[2] = curr_node
-					prev_numspace = num_space
-					space_validation.append(num_space)
-					# prev_node = curr_node
-					# prev_parent = parent
-					
+		if len(line.strip()) > 0:
+			lines += 1
+			if lines == 1:
+				x = len(line) - len(line.lstrip(' '))
+				root = line.strip()
+				parents[0] = None
+				nodes.append([root,1,parents[0],None])
+				space_validation.append(x)
+				# parent = root
+				
+			elif lines == 2:
+				y = len(line) - len(line.lstrip(' '))
+				y = y-x
+				num_space = len(line) - len(line.lstrip(' '))
+				curr_node = line.strip()
+				parents[1] = root
+				nodes.append([curr_node,2,parents[1],None])
+				parents[2] = curr_node
+				prev_numspace = num_space
+				space_validation.append(num_space)
+				# prev_node = curr_node
+				# prev_parent = parent
+				
+			else:
+				# if num_space < (len(line) - len(line.lstrip(' '))):
+				# 	prev_parent = parent
+				# 	parent = prev_node
+				# elif num_space == (len(line) - len(line.lstrip(' '))):
+				# 	pass
+				# elif num_space > (len(line) - len(line.lstrip(' '))):
+				# 	parent = prev_parent
+				num_space = len(line) - len(line.lstrip(' '))
+				if not (num_space) - y in space_validation:
+					# print(space_validation)
+					# print(line.strip(),x,y,num_space,(num_space) - y)
+					raise_error(8)
+				if num_space > prev_numspace and not num_space == (prev_numspace + y):
+					raise_error(10)
+				space_validation.append(num_space)
+				level = int((num_space - x)/y) + 1
+				curr_node = line.strip()
+				if curr_node == '':
+					# nodes[len(nodes)-1][3] = 'child'
+					nodes.append(['child',level,parents[level-1],1])
+					if level >= 1:
+						parents[level] = curr_node
+
+				elif curr_node == '':
+					# nodes[len(nodes)-1][3] = 'child[fill=none] {edge from parent[draw=none]}'
+					nodes.append(['child[fill=none] {edge from parent[draw=none]}',level,parents[level-1],2])
+					if level >= 1:
+						parents[level] = curr_node
 				else:
-					# if num_space < (len(line) - len(line.lstrip(' '))):
-					# 	prev_parent = parent
-					# 	parent = prev_node
-					# elif num_space == (len(line) - len(line.lstrip(' '))):
-					# 	pass
-					# elif num_space > (len(line) - len(line.lstrip(' '))):
-					# 	parent = prev_parent
-					num_space = len(line) - len(line.lstrip(' '))
-					if not (num_space) - y in space_validation:
-						# print(space_validation)
-						# print(line.strip(),x,y,num_space,(num_space) - y)
-						raise_error(8)
-					if num_space > prev_numspace and not num_space == (prev_numspace + y):
-						raise_error(10)
-					space_validation.append(num_space)
-					level = int((num_space - x)/y) + 1
-					curr_node = line.strip()
-					if curr_node == '':
-						nodes[len(nodes)-1][3] = ''
-					elif curr_node == '':
-						nodes[len(nodes)-1][3] = '[fill=none] {edge from parent[draw=none]}'
-					else:
-						nodes.append([curr_node,level,parents[level-1],None])
-						prev_node = curr_node
-						if level >= 1:
-							parents[level] = curr_node
-						prev_numspace = num_space
+					nodes.append([curr_node,level,parents[level-1],None])
+					prev_node = curr_node
+					if level >= 1:
+						parents[level] = curr_node
+					prev_numspace = num_space
 
 	if lines < 2:
 		raise_error(3)
 	else:
-		print("X: ",x,'Y: ',y)
-		print(nodes)
-		return [x,y]
+		# print("X: ",x,'Y: ',y)
+		# print(nodes)
+		# return [x,y]
+		create_file()
 
 def raise_error(_id):
-	print('Incorrect invocation',_id)
-	# print('Incorrect invocation')
+	global lines
+	if _id >= 8:
+		print("Wrong number of leading spaces on nonblank line ",lines)
+	else:
+	# print('Incorrect invocation',_id,lines)
+		print('Incorrect invocation')
 	sys.exit()
+
+def create_file():
+	global filename
+	global default_nodestyle
+	global grow_style
+	par_flag = False
+	endflag = False
+	spcflag = False
+	brackets_req = True
+	prev_level = 1
+	openlevel = 0
+	a = 1
+	parents = list()
+	op_file = open(filename[:-4]+'.tex','w')
+	op_file.write("\documentclass[10pt]{article}\n\\usepackage{tikz}\n\\usetikzlibrary{shapes}\n\pagestyle{empty}\n\n\\begin{document}\n\n\\begin{center}\n\\begin{tikzpicture}\n")
+	# op_ready = nodes
+	# op_ready.sort(key = lambda sublist: sublist[1])
+	if not grow_style == None:
+		op_file.write("[grow'="+grow_style+"]\n")
+	if not default_nodestyle == None:
+		op_file.write("\\tikzstyle{every node}=["+default_nodestyle+",draw]\n")
+	for k in nodes:
+		parents.append(k[2])
+	for i in range(0,len(nodes)):
+		if nodes[i][2] == None:
+			op_file.write("\\node {"+nodes[i][0]+"}\n")
+			curr_parent = nodes[i][0]
+			prev_parent_node = nodes[i][0]
+		else:
+			if nodes[i][3] == None:
+				if prev_level - nodes[i][1] > 1 and brackets_req:
+					spcflag = True
+				if not spcflag:
+					for j in range(0,4*(nodes[i][1]-1)):
+						op_file.write(" ")
+				if prev_level > nodes[i][1]:
+					# print('val:',prev_level - nodes[i][1])
+					if prev_level - nodes[i][1] > 1 and brackets_req:
+						req_range = prev_level - nodes[i][1]
+						for m in range(req_range,0,-1):
+							# print(req_range-(a))
+							# print(m)
+							for j in range(0,(4*m)):
+								op_file.write(" ")
+							op_file.write("}\n")
+							openlevel -= 1
+							par_flag = False
+							a += 1
+						spcflag = False
+							# print("abcsfds")
+					elif brackets_req:
+						# for j in range(0,4*(nodes[i][1]-2)):
+						# 	op_file.write("")
+						op_file.write("}\n")
+						openlevel -= 1
+						par_flag = False
+					for j in range(0,4*(nodes[i][1]-1)):
+						op_file.write(" ")
+				if nodes[i][0] not in parents:
+					if prev_level > nodes[i][1] and par_flag:
+						for j in range(0,4*(nodes[i][1]-1)):
+							op_file.write(" ")
+						op_file.write("}\n")
+						openlevel -= 1
+						par_flag = False
+
+					if i == len(nodes)-1 and not par_flag:
+						op_file.write("child {node {"+nodes[i][0]+"}};\n")
+						endflag = True
+					else:
+						op_file.write("child {node {"+nodes[i][0]+"}}\n")
+					# if i == len(nodes)-1 and brackets_req:
+					# 	brackets_req = False
+					if i == len(nodes)-1 and openlevel == 1:
+						brackets_req = False
+					if i == len(nodes)-1 and par_flag:
+						# print('val:',prev_level - nodes[i][1])
+						if prev_level - nodes[i][1] > 1 and brackets_req:
+							a = 1
+							req_range = prev_level - nodes[i][1] 
+							for m in range(0,req_range):
+								for j in range(0,4*(nodes[i][1]-(a))):
+									op_file.write(" ")
+								op_file.write("}\n")
+								openlevel -= 1
+								par_flag = False
+								a += 1
+								# print("abcsfds")
+						elif brackets_req:
+							for j in range(0,4*(nodes[i][1]-2)):
+								op_file.write(" ")
+							op_file.write("}\n")
+							openlevel -= 1
+							brackets_req = False
+
+						# if par_flag:
+						# 	for j in range(0,4*(nodes[i][1]-2)):
+						# 		op_file.write(" ")
+						# 	op_file.write("}\n")
+				else:
+					# for j in range(0,4*(nodes[i][1]-2)):
+					# 	op_file.write(" ")
+					op_file.write("child {node {"+nodes[i][0]+"}\n")
+					openlevel += 1
+					par_flag = True
+					brackets_req = True
+				# else:
+			if nodes[i][3] == 1:
+				if prev_level > nodes[i][1] and par_flag and not prev_level - nodes[i][1] > 1:
+					for j in range(0,4*(nodes[i][1]-1)):
+						op_file.write(" ")
+					op_file.write("}\n")
+					openlevel -= 1
+					par_flag = False
+				if prev_level - nodes[i][1] > 1 and brackets_req:
+					req_range = prev_level - nodes[i][1]
+					a= 0
+					for m in range(0,req_range):
+						# print(nodes[i][1]-(a))
+						# print(req_range, " asd")
+						for j in range(0,4*(nodes[i][1]+(a))):
+							op_file.write(" ")
+						a -= 1
+						op_file.write("}\n")
+						openlevel -= 1
+						par_flag = False
+						
+				try:
+					if nodes[i+1][1] > nodes[i][1]:
+						brackets_req = False
+						# for j in range(0,4*(nodes[i][1]-1)):
+						# 	op_file.write(" ")
+						# op_file.write('child {node {'+ nodes[i][0] +'}}\n')
+						for j in range(0,4*(nodes[i][1]-1)):
+							op_file.write(" ")
+						op_file.write(nodes[i][0]+' {\n')
+						openlevel += 1
+						par_flag = True
+						brackets_req = True
+					else:
+						for j in range(0,4*(nodes[i][1]-1)):
+							op_file.write(" ")
+						op_file.write(nodes[i][0]+'\n')
+				except IndexError:
+					pass
+
+			elif nodes[i][3] == 2:
+				for j in range(0,4*(nodes[i][1]-1)):
+						op_file.write(" ")
+				op_file.write("child[fill=none] {edge from parent[draw=none]}\n")
+			prev_level = nodes[i][1]
+			# print(prev_level)
+	if endflag == False:
+		op_file.write("    };\n")
+	op_file.write("\\end{tikzpicture}\n\\end{center}\n\n\\end{document}\n")
 
 process_arguments()
